@@ -66,7 +66,7 @@ else
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("swagger/v1/swagger.json", "ORDER API");
+        c.SwaggerEndpoint("swagger/v1/swagger.json", "PRODUCT API");
         c.RoutePrefix = string.Empty;
     });
 }
