@@ -20,7 +20,6 @@ namespace Mango.Web.Controllers
 
             if(response != null && response.IsSuccess == true)
             {
-                TempData["success"] = "Get products successfully";
                 list = JsonConvert.DeserializeObject<List<ProductDto>>(Convert.ToString(response.Result));
             }
             else
