@@ -3,6 +3,7 @@ using Mango.MessageBus;
 using Mango.Services.OrderAPI.Data;
 using Mango.Services.OrderAPI.Models;
 using Mango.Services.OrderAPI.Models.Dto;
+using Mango.Services.OrderAPI.RabbitMQSender;
 using Mango.Services.OrderAPI.Service.IService;
 using Mango.Services.OrderAPI.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -23,17 +24,17 @@ namespace Mango.Services.OrderAPI.Controllers
         private IMapper _mapper;
         private readonly AppDbContext _db;
         private IProductService _productService;
-        private readonly IMessageBus _messageBus;
+        private readonly IRabbitMQOrderMessageSender _sender;
         private readonly IConfiguration _configuration;
 
-        public OrderAPIController(AppDbContext db, IMapper mapper, IProductService productService, IConfiguration configuration, IMessageBus messageBus)
+        public OrderAPIController(AppDbContext db, IMapper mapper, IProductService productService, IConfiguration configuration, IRabbitMQOrderMessageSender sender)
         {
             _db = db;
             this._response = new ResponseDto();
             _mapper = mapper;
             _productService = productService;
             _configuration = configuration;
-            _messageBus = messageBus;
+            _sender = sender;
         }
 
         [Authorize]
@@ -150,8 +151,8 @@ namespace Mango.Services.OrderAPI.Controllers
                         UserId = orderHeader.UserId
                     };
 
-                    string topicName = _configuration.GetValue<string>("OrderCreatedTopic:OrderCreated");
-                    await _messageBus.PublicMessage(rewardsDto, topicName);
+                    string exchangeName = _configuration.GetValue<string>("OrderCreatedTopic:OrderCreated");
+                    _sender.SendMessage(rewardsDto, exchangeName);
 
                     _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
                 }
